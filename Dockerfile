@@ -7,21 +7,23 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install gd pdo pdo_pgsql pgsql zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Versión MantisBT
+# Versión de MantisBT
 ENV MANTIS_VERSION=2.26.1
 
-# Descargar MantisBT
-RUN curl -L https://github.com/mantisbt/mantisbt/archive/release-${MANTIS_VERSION}.zip -o /tmp/mantis.zip \
-    && unzip /tmp/mantis.zip -d /var/www/html \
-    && mv /var/www/html/mantisbt-release-${MANTIS_VERSION}/* /var/www/html \
-    && rm -rf /var/www/html/mantisbt-release-${MANTIS_VERSION} /tmp/mantis.zip
+# 🔹 Descargar el paquete OFICIAL (incluye vendor/)
+RUN curl -L "https://downloads.sourceforge.net/project/mantisbt/mantis-stable/${MANTIS_VERSION}/mantisbt-${MANTIS_VERSION}.tar.gz" -o /tmp/mantis.tar.gz \
+    && tar -xzf /tmp/mantis.tar.gz -C /tmp \
+    && mv /tmp/mantisbt-${MANTIS_VERSION}/* /var/www/html \
+    && rm -rf /tmp/mantisbt-${MANTIS_VERSION} /tmp/mantis.tar.gz
 
-# Crear carpeta de configuración
+# Carpeta de config
 RUN mkdir -p /var/www/html/config
 
+# Copiar entrypoint
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Permisos
 RUN chown -R www-data:www-data /var/www/html
 
 WORKDIR /var/www/html
